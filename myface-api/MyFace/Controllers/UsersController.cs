@@ -4,6 +4,7 @@ using MyFace.Models.Response;
 using MyFace.Repositories;
 using MyFace.Helpers;
 using MyFace.Models.Database;
+using System;
 
 namespace MyFace.Controllers
 {
@@ -21,6 +22,9 @@ namespace MyFace.Controllers
         [HttpGet("")]
         public ActionResult<UserListResponse> Search([FromQuery] UserSearchRequest searchRequest)
         {
+            var authHeader = Request;
+            string headerInfo = AuthorizationHeaderReader.GetAuthorizationHeader(authHeader);
+            Console.WriteLine(headerInfo);
             var users = _users.Search(searchRequest);
             var userCount = _users.Count(searchRequest);
             return UserListResponse.Create(searchRequest, users, userCount);

@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using MyFace.Helpers;
 using MyFace.Models.Database;
 using MyFace.Models.Request;
+using SQLitePCL;
 
 namespace MyFace.Repositories
 {
@@ -12,11 +15,12 @@ namespace MyFace.Repositories
         IEnumerable<User> Search(UserSearchRequest search);
         int Count(UserSearchRequest search);
         User GetById(int id);
+        User GetByUsername (string username);
         User Create(CreateUserRequest newUser);
         User Update(int id, UpdateUserRequest update);
         void Delete(int id);
     }
-    
+
     public class UsersRepo : IUsersRepo
     {
         private readonly MyFaceDbContext _context;
@@ -25,11 +29,11 @@ namespace MyFace.Repositories
         {
             _context = context;
         }
-        
+
         public IEnumerable<User> Search(UserSearchRequest search)
         {
             return _context.Users
-                .Where(p => search.Search == null || 
+                .Where(p => search.Search == null ||
                             (
                                 p.FirstName.ToLower().Contains(search.Search) ||
                                 p.LastName.ToLower().Contains(search.Search) ||
@@ -44,7 +48,7 @@ namespace MyFace.Repositories
         public int Count(UserSearchRequest search)
         {
             return _context.Users
-                .Count(p => search.Search == null || 
+                .Count(p => search.Search == null ||
                             (
                                 p.FirstName.ToLower().Contains(search.Search) ||
                                 p.LastName.ToLower().Contains(search.Search) ||
@@ -59,6 +63,13 @@ namespace MyFace.Repositories
                 .Single(user => user.Id == id);
         }
 
+        public User GetByUsername(string username)
+        {
+            return _context.Users
+                .Single(user => user.Username == username);
+        }
+
+
         public User Create(CreateUserRequest newUser)
         {
 
@@ -70,12 +81,18 @@ namespace MyFace.Repositories
                 Email = newUser.Email,
                 Username = newUser.Username,
                 ProfileImageUrl = newUser.ProfileImageUrl,
-                CoverImageUrl = newUser.CoverImageUrl,               
+                CoverImageUrl = newUser.CoverImageUrl,
                 HashedPassword = HashedPassword,
-                Salt =  Salt.ToString()
+                Salt = System.Text.Encoding.UTF8.GetString(Salt)
             });
-            
+
             _context.SaveChanges();
+
+            // for (var x=0; x< Salt.Length; x++)
+            // {
+            //     Console.WriteLine(Salt[x]);
+            // }
+
 
             return insertResponse.Entity;
         }
@@ -103,5 +120,7 @@ namespace MyFace.Repositories
             _context.Users.Remove(user);
             _context.SaveChanges();
         }
+
+       
     }
 }
