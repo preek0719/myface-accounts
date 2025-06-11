@@ -127,6 +127,8 @@ namespace MyFace.Data
                 Email = Data[index][3],
                 ProfileImageUrl = ImageGenerator.GetProfileImage(Data[index][2]),
                 CoverImageUrl = ImageGenerator.GetCoverImage(index),
+                HashedPassword = "MyB1rthd4y!",
+                Salt = "5@lt",
             };
         }
     }

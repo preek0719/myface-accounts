@@ -2,6 +2,8 @@
 using MyFace.Models.Request;
 using MyFace.Models.Response;
 using MyFace.Repositories;
+using MyFace.Helpers;
+using MyFace.Models.Database;
 
 namespace MyFace.Controllers
 {
@@ -38,9 +40,8 @@ namespace MyFace.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
-            var user = _users.Create(newUser);
 
+            var user =  _users.Create(newUser);
             var url = Url.Action("GetById", new { id = user.Id });
             var responseViewModel = new UserResponse(user);
             return Created(url, responseViewModel);
