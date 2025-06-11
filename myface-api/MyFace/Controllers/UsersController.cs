@@ -23,7 +23,8 @@ namespace MyFace.Controllers
         public ActionResult<UserListResponse> Search([FromQuery] UserSearchRequest searchRequest)
         {
             var authHeader = Request;
-            string headerInfo = AuthorizationHeaderReader.GetAuthorizationHeader(authHeader);
+                   
+            string headerInfo = AuthorizationHeaderReader.GetAuthorizationHeader(authHeader, _users);
             Console.WriteLine(headerInfo);
             var users = _users.Search(searchRequest);
             var userCount = _users.Count(searchRequest);

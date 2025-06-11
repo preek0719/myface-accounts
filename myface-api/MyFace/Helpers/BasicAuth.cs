@@ -9,8 +9,14 @@ using SQLitePCL;
 namespace MyFace.Helpers
 {
     public class AuthorizationHeaderReader 
-    {    
-        
+    {
+        // private IUsersRepo _iUsersRepo;
+
+        // public AuthorizationHeaderReader(IUsersRepo iUsersRepo)
+        // {
+        //     _iUsersRepo = iUsersRepo;
+        // }
+       
        
         public static string GetAuthorizationHeader(HttpRequest request, IUsersRepo usersRepo)
 
@@ -53,5 +59,3 @@ namespace MyFace.Helpers
     
 
 }
-
-// Basic dGVzdC11c2VyOnNlY3JldA==
