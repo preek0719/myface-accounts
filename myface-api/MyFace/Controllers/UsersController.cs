@@ -22,10 +22,10 @@ namespace MyFace.Controllers
         [HttpGet("")]
         public ActionResult<UserListResponse> Search([FromQuery] UserSearchRequest searchRequest)
         {
-            var authHeader = Request;
+            // var authHeader = Request;
                    
-            bool validUser = AuthorizationHeaderReader.AuthenticateUser(authHeader, _users);
-            Console.WriteLine(validUser);
+            // bool validUser = AuthorizationHeaderReader.AuthenticateUser(authHeader, _users);
+            // Console.WriteLine(validUser);
             var users = _users.Search(searchRequest);
             var userCount = _users.Count(searchRequest);
             return UserListResponse.Create(searchRequest, users, userCount);

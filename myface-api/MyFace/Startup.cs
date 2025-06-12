@@ -31,11 +31,14 @@ namespace MyFace
 
             services.AddCors(options =>
             {
-                options.AddPolicy(CORS_POLICY_NAME, builder =>
-                    builder
-                        .WithOrigins("http://localhost:3000")
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
+                options.AddPolicy(
+                    CORS_POLICY_NAME,
+                    builder =>
+                        builder
+                            .WithOrigins("http://localhost:3000")
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                );
             });
 
             services.AddControllers();
@@ -58,6 +61,7 @@ namespace MyFace
                 app.UseHsts();
             }
 
+            app.UseMiddleware<Helpers.HeaderAuthentication>();
             app.UseHttpsRedirection();
 
             app.UseRouting();
