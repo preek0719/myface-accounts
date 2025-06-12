@@ -1,24 +1,21 @@
 using System;
+using System.ComponentModel;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
 using MyFace.Helpers;
+using MyFace.Migrations;
 using MyFace.Models.Database;
 using MyFace.Repositories;
 using SQLitePCL;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using MyFace.Migrations;
-using System.ComponentModel;
 
 namespace MyFace.Helpers
 {
-    public class AuthorizationHeaderReader 
+    public class AuthorizationHeaderReader
     {
-           
-       
         public static bool AuthenticateUser(HttpRequest request, IUsersRepo usersRepo)
-
-        {        
+        {
             var authHeaderValues = request.Headers["Authorization"];
 
             if (authHeaderValues.Count == 0)
@@ -40,27 +37,24 @@ namespace MyFace.Helpers
                 User user = usersRepo.GetByUsername(username);
                 if (user != null)
                 {
-                    
-                    var userSalt = user.Salt;                    
-                    string hashedUserInput = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                    password: password,
-                    salt: userSalt,
-                    prf: KeyDerivationPrf.HMACSHA256,
-                    iterationCount: 100000,
-                    numBytesRequested: 256 / 8));
-                    
-                   if (hashedUserInput == user.HashedPassword)
+                    var userSalt = user.Salt;
+                    string hashedUserInput = Convert.ToBase64String(
+                        KeyDerivation.Pbkdf2(
+                            password: password,
+                            salt: userSalt,
+                            prf: KeyDerivationPrf.HMACSHA256,
+                            iterationCount: 100000,
+                            numBytesRequested: 256 / 8
+                        )
+                    );
+
+                    if (hashedUserInput == user.HashedPassword)
                     {
                         return true;
                     }
                 }
                 return false;
-                
             }
-
         }
-
     }
-    
-
 }
