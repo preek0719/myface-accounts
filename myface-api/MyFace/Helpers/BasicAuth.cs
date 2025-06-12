@@ -18,7 +18,7 @@ namespace MyFace.Helpers
         // }
        
        
-        public static string GetAuthorizationHeader(HttpRequest request, IUsersRepo usersRepo)
+        public static string Authentication(HttpRequest request, IUsersRepo usersRepo)
 
         {
 
