@@ -18,8 +18,7 @@ namespace MyFace.Helpers
        
         public static bool AuthenticateUser(HttpRequest request, IUsersRepo usersRepo)
 
-        {
-        
+        {        
             var authHeaderValues = request.Headers["Authorization"];
 
             if (authHeaderValues.Count == 0)
@@ -37,10 +36,8 @@ namespace MyFace.Helpers
                 var parts = decodedHeader.Split(':');
                 string username = parts[0];
                 string password = parts[1];
-                Console.WriteLine(username);
 
                 User user = usersRepo.GetByUsername(username);
-                Console.WriteLine(user.Username);
                 if (user != null)
                 {
                     
