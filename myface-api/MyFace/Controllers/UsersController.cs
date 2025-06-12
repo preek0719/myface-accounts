@@ -24,8 +24,8 @@ namespace MyFace.Controllers
         {
             var authHeader = Request;
                    
-            string headerInfo = AuthorizationHeaderReader.GetAuthorizationHeader(authHeader, _users);
-            Console.WriteLine(headerInfo);
+            bool validUser = AuthorizationHeaderReader.AuthenticateUser(authHeader, _users);
+            Console.WriteLine(validUser);
             var users = _users.Search(searchRequest);
             var userCount = _users.Count(searchRequest);
             return UserListResponse.Create(searchRequest, users, userCount);

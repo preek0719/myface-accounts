@@ -66,7 +66,7 @@ namespace MyFace.Repositories
         public User GetByUsername(string username)
         {
             return _context.Users
-                .Single(user => user.Username == username);
+                .SingleOrDefault(user => user.Username.Equals(username));
         }
 
 
@@ -74,6 +74,8 @@ namespace MyFace.Repositories
         {
 
             PasswordHelper.CreatePasswordHash(newUser.Password, out byte[] Salt, out string HashedPassword);
+            
+
             var insertResponse = _context.Users.Add(new User
             {
                 FirstName = newUser.FirstName,
@@ -83,7 +85,9 @@ namespace MyFace.Repositories
                 ProfileImageUrl = newUser.ProfileImageUrl,
                 CoverImageUrl = newUser.CoverImageUrl,
                 HashedPassword = HashedPassword,
-                Salt = System.Text.Encoding.UTF8.GetString(Salt)
+                Salt = Salt
+                // Salt = System.Text.Encoding.UTF8.GetString(Salt)
+                // Salt = Convert.ToBase64String(Salt)
             });
 
             _context.SaveChanges();

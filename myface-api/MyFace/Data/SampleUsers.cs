@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using MyFace.Models.Database;
+using System.Security.Cryptography;
 
 namespace MyFace.Data
 {
@@ -118,7 +119,12 @@ namespace MyFace.Data
         }
 
         private static User CreateRandomUser(int index)
-        {
+        {   
+            var Salt = new byte[128 / 8];
+            using (var rngCsp = new RNGCryptoServiceProvider())
+            {
+                rngCsp.GetNonZeroBytes(Salt);
+            }
             return new User
             {
                 FirstName = Data[index][0],
@@ -128,7 +134,8 @@ namespace MyFace.Data
                 ProfileImageUrl = ImageGenerator.GetProfileImage(Data[index][2]),
                 CoverImageUrl = ImageGenerator.GetCoverImage(index),
                 HashedPassword = "MyB1rthd4y!",
-                Salt = "5@lt",
+                Salt = Salt,
+                
             };
         }
     }

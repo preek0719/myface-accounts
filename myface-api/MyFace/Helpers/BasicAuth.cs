@@ -5,28 +5,26 @@ using MyFace.Helpers;
 using MyFace.Models.Database;
 using MyFace.Repositories;
 using SQLitePCL;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using MyFace.Migrations;
+using System.ComponentModel;
 
 namespace MyFace.Helpers
 {
     public class AuthorizationHeaderReader 
     {
-        // private IUsersRepo _iUsersRepo;
-
-        // public AuthorizationHeaderReader(IUsersRepo iUsersRepo)
-        // {
-        //     _iUsersRepo = iUsersRepo;
-        // }
+           
        
-       
-        public static string Authentication(HttpRequest request, IUsersRepo usersRepo)
+        public static bool AuthenticateUser(HttpRequest request, IUsersRepo usersRepo)
 
         {
-
+        
             var authHeaderValues = request.Headers["Authorization"];
 
             if (authHeaderValues.Count == 0)
             {
-                return null;
+                return false;
             }
 
             var authHeader = authHeaderValues.ToString();
@@ -34,27 +32,37 @@ namespace MyFace.Helpers
                 string encoded = authHeader.Substring("Basic ".Length - 1).Trim();
 
                 byte[] binaryData = System.Convert.FromBase64String(encoded);
-
                 string decodedHeader = System.Text.Encoding.UTF8.GetString(binaryData);
 
                 var parts = decodedHeader.Split(':');
                 string username = parts[0];
+                string password = parts[1];
+                Console.WriteLine(username);
 
-                usersRepo.GetByUsername(username);
-
-                PasswordHelper.CreatePasswordHash(decodedHeader.Split(':')[1], out byte[] Salt, out string HashedPassword);
-
-                Console.WriteLine(decodedHeader);
-                Console.WriteLine(HashedPassword);
-                return decodedHeader;
+                User user = usersRepo.GetByUsername(username);
+                Console.WriteLine(user.Username);
+                if (user != null)
+                {
+                    
+                    var userSalt = user.Salt;                    
+                    string hashedUserInput = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                    password: password,
+                    salt: userSalt,
+                    prf: KeyDerivationPrf.HMACSHA256,
+                    iterationCount: 100000,
+                    numBytesRequested: 256 / 8));
+                    
+                   if (hashedUserInput == user.HashedPassword)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+                
             }
 
         }
 
-        public static void ValidatePassword(string userDetails)
-        {
-           
-        }
     }
     
 
