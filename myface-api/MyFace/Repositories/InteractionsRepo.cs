@@ -14,7 +14,7 @@ namespace MyFace.Repositories
         Interaction Create(CreateInteractionRequest create);
         void Delete(int id);
     }
-    
+
     public class InteractionsRepo : IInteractionsRepo
     {
         private readonly MyFaceDbContext _context;
@@ -23,11 +23,11 @@ namespace MyFace.Repositories
         {
             _context = context;
         }
-        
+
         public IEnumerable<Interaction> Search(SearchRequest search)
         {
-            return _context.Interactions
-                .Skip((search.Page - 1) * search.PageSize)
+            return _context
+                .Interactions.Skip((search.Page - 1) * search.PageSize)
                 .Take(search.PageSize);
         }
 
@@ -43,13 +43,15 @@ namespace MyFace.Repositories
 
         public Interaction Create(CreateInteractionRequest create)
         {
-            var insertResult = _context.Interactions.Add(new Interaction
-            {
-                Date = DateTime.Now,
-                Type = create.InteractionType,
-                PostId = create.PostId,
-                UserId = create.UserId,
-            });
+            var insertResult = _context.Interactions.Add(
+                new Interaction
+                {
+                    Date = DateTime.Now,
+                    Type = create.InteractionType,
+                    PostId = create.PostId,
+                    UserId = create.UserId,
+                }
+            );
             _context.SaveChanges();
             return insertResult.Entity;
         }
