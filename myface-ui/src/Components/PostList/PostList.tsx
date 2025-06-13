@@ -1,20 +1,30 @@
-﻿import React, {useEffect, useState} from 'react';
+﻿import React, {useEffect, useState, useContext} from 'react';
 import {ListResponse, Post} from "../../Api/apiClient";
 import {Grid} from "../Grid/Grid";
 import {PostCard} from "../PostCard/PostCard";
+import {LoginContext} from "../../Components/LoginManager/LoginManager";
 
 interface PostListProps {
     title: string,
-    fetchPosts: () => Promise<ListResponse<Post>>
+    fetchPosts: (authHeader: string) => Promise<ListResponse<Post>>
 }
 
 export function PostList(props: PostListProps): JSX.Element {
     const [posts, setPosts] = useState<Post[]>([]);
+    const {authHeader} = useContext(LoginContext);
+    
     
     useEffect(() => {
-        props.fetchPosts()
-            .then(response => setPosts(response.items));
-    }, [props]);
+        if (authHeader){
+            props.fetchPosts(authHeader)
+            .then(response => setPosts(response.items))
+            .catch(err => console.error(err));
+        }
+        // props.fetchPosts(authHeader)
+        //     .then(response => setPosts(response.items));
+        
+    }, [authHeader, props]);
+
     
     return (
         <section>

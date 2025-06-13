@@ -4,11 +4,14 @@ import {Card} from "../Card/Card";
 import "./PostCard.scss";
 import {Link} from "react-router-dom";
 
+
 interface PostCardProps {
     post: Post;
+
 }
 
 export function PostCard(props: PostCardProps): JSX.Element {
+     
     return (
         <Card>
             <div className="post-card">

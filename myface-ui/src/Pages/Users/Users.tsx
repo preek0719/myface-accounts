@@ -1,16 +1,18 @@
-﻿import React, {useState} from "react";
+﻿import React, {useState, useContext} from "react";
 import {Page} from "../Page/Page";
 import {SearchInput} from "../../Components/SearchInput/SearchInput";
 import {fetchUsers} from "../../Api/apiClient";
 import {UserCard} from "../../Components/UserCard/UserCard";
 import {InfiniteList} from "../../Components/InfititeList/InfiniteList";
+import {LoginContext} from "../../Components/LoginManager/LoginManager";
 import "./Users.scss";
 
 export function Users(): JSX.Element {
     const [searchTerm, setSearchTerm] = useState("");
+    const {authHeader} = useContext(LoginContext);
     
-    function getUsers(page: number, pageSize: number) {
-        return fetchUsers(searchTerm, page, pageSize);
+    function getUsers(authHeader: string, page: number, pageSize: number) {
+        return fetchUsers(authHeader, searchTerm, page, pageSize);
     }
     
     return (
