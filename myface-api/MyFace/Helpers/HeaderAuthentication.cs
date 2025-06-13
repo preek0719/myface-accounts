@@ -35,7 +35,7 @@ namespace MyFace.Helpers
 
             if (authHeaderValues.Length == 0)
             {
-                await context.Response.WriteAsync("Authorization header missing.");
+                await context.Response.WriteAsync("Authorization header missing line 38.");
                 return;
             }
 
