@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -38,16 +40,22 @@ namespace MyFace
                         .AllowAnyHeader());
             });
 
+           
+
             services.AddControllers();
 
             services.AddTransient<IInteractionsRepo, InteractionsRepo>();
             services.AddTransient<IPostsRepo, PostsRepo>();
             services.AddTransient<IUsersRepo, UsersRepo>();
+            
+
+                
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -58,11 +66,13 @@ namespace MyFace
                 app.UseHsts();
             }
 
+            app.UseCors(CORS_POLICY_NAME);
+
+            app.UseMiddleware<Helpers.BasicAuth>();
+
             app.UseHttpsRedirection();
 
-            app.UseRouting();
-
-            app.UseCors(CORS_POLICY_NAME);
+            app.UseRouting();            
 
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }

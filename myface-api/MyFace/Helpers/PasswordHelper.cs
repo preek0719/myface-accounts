@@ -3,6 +3,12 @@ using System.Reflection.Metadata;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using MyFace.Models.Database;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 
 namespace MyFace.Helpers
 

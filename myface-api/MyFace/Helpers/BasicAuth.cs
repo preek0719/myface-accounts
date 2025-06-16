@@ -1,34 +1,51 @@
 using System;
+using System.ComponentModel;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 using MyFace.Helpers;
+using MyFace.Migrations;
 using MyFace.Models.Database;
 using MyFace.Repositories;
 using SQLitePCL;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using MyFace.Migrations;
-using System.ComponentModel;
 
 namespace MyFace.Helpers
 {
-    public class AuthorizationHeaderReader 
+    public class BasicAuth
     {
-           
-       
-        public static bool AuthenticateUser(HttpRequest request, IUsersRepo usersRepo)
+        private readonly RequestDelegate _next;
 
-        {        
-            var authHeaderValues = request.Headers["Authorization"];
+        public BasicAuth(RequestDelegate next)
+        {
+            _next = next;
+        }
 
-            if (authHeaderValues.Count == 0)
+        public async Task InvokeAsync(HttpContext context, IUsersRepo usersRepo)
+        {
+            context.Request.Headers.TryGetValue("Authorization", out StringValues authString);
+             if (!context.Request.Headers.ContainsKey("Authorization"))
             {
-                return false;
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsync("Authorization header missing.");
+                return;
             }
 
-            var authHeader = authHeaderValues.ToString();
+            var authHeaderValues = context.Request.Headers["Authorization"].ToString();
+
+            if (authHeaderValues.Length == 0)
             {
-                string encoded = authHeader.Substring("Basic ".Length - 1).Trim();
+                await context.Response.WriteAsync("Authorization header missing.");
+                return;
+            }
+
+            if (authHeaderValues.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
+            {
+                var authHeader = authHeaderValues.ToString();
+
+                string encoded = authHeader.Substring("Basic ".Length).Trim();
 
                 byte[] binaryData = System.Convert.FromBase64String(encoded);
                 string decodedHeader = System.Text.Encoding.UTF8.GetString(binaryData);
@@ -38,29 +55,34 @@ namespace MyFace.Helpers
                 string password = parts[1];
 
                 User user = usersRepo.GetByUsername(username);
+
                 if (user != null)
                 {
-                    
-                    var userSalt = user.Salt;                    
-                    string hashedUserInput = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                    password: password,
-                    salt: userSalt,
-                    prf: KeyDerivationPrf.HMACSHA256,
-                    iterationCount: 100000,
-                    numBytesRequested: 256 / 8));
-                    
-                   if (hashedUserInput == user.HashedPassword)
+                    Console.WriteLine("test51");
+                    var userSalt = user.Salt;
+                    string hashedUserInput = Convert.ToBase64String(
+                        KeyDerivation.Pbkdf2(
+                            password: password,
+                            salt: userSalt,
+                            prf: KeyDerivationPrf.HMACSHA256,
+                            iterationCount: 100000,
+                            numBytesRequested: 256 / 8
+                        )
+                    );
+
+                    if (hashedUserInput == user.HashedPassword)
                     {
-                        return true;
+                        await _next(context);
+                        return;
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        await context.Response.WriteAsync("Invalid credentials.");
                     }
                 }
-                return false;
-                
             }
-
+            await context.Response.WriteAsync("Invalid authorization header");
         }
-
     }
-    
-
 }
