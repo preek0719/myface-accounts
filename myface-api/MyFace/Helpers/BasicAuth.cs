@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Security.Cryptography;
+
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using MyFace.Helpers;
 using MyFace.Migrations;
+
 using MyFace.Models.Database;
 using MyFace.Repositories;
 using SQLitePCL;
@@ -58,7 +60,6 @@ namespace MyFace.Helpers
 
                 if (user != null)
                 {
-                    Console.WriteLine("test51");
                     var userSalt = user.Salt;
                     string hashedUserInput = Convert.ToBase64String(
                         KeyDerivation.Pbkdf2(
@@ -86,3 +87,9 @@ namespace MyFace.Helpers
         }
     }
 }
+
+             
+            
+        
+    
+

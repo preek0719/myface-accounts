@@ -15,7 +15,7 @@ namespace MyFace.Repositories
         IEnumerable<User> Search(UserSearchRequest search);
         int Count(UserSearchRequest search);
         User GetById(int id);
-        User GetByUsername (string username);
+        User GetByUsername(string username);
         User Create(CreateUserRequest newUser);
         User Update(int id, UpdateUserRequest update);
         void Delete(int id);
@@ -32,14 +32,16 @@ namespace MyFace.Repositories
 
         public IEnumerable<User> Search(UserSearchRequest search)
         {
-            return _context.Users
-                .Where(p => search.Search == null ||
-                            (
-                                p.FirstName.ToLower().Contains(search.Search) ||
-                                p.LastName.ToLower().Contains(search.Search) ||
-                                p.Email.ToLower().Contains(search.Search) ||
-                                p.Username.ToLower().Contains(search.Search)
-                            ))
+            return _context
+                .Users.Where(p =>
+                    search.Search == null
+                    || (
+                        p.FirstName.ToLower().Contains(search.Search)
+                        || p.LastName.ToLower().Contains(search.Search)
+                        || p.Email.ToLower().Contains(search.Search)
+                        || p.Username.ToLower().Contains(search.Search)
+                    )
+                )
                 .OrderBy(u => u.Username)
                 .Skip((search.Page - 1) * search.PageSize)
                 .Take(search.PageSize);
@@ -47,48 +49,50 @@ namespace MyFace.Repositories
 
         public int Count(UserSearchRequest search)
         {
-            return _context.Users
-                .Count(p => search.Search == null ||
-                            (
-                                p.FirstName.ToLower().Contains(search.Search) ||
-                                p.LastName.ToLower().Contains(search.Search) ||
-                                p.Email.ToLower().Contains(search.Search) ||
-                                p.Username.ToLower().Contains(search.Search)
-                            ));
+            return _context.Users.Count(p =>
+                search.Search == null
+                || (
+                    p.FirstName.ToLower().Contains(search.Search)
+                    || p.LastName.ToLower().Contains(search.Search)
+                    || p.Email.ToLower().Contains(search.Search)
+                    || p.Username.ToLower().Contains(search.Search)
+                )
+            );
         }
 
         public User GetById(int id)
         {
-            return _context.Users
-                .Single(user => user.Id == id);
+            return _context.Users.Single(user => user.Id == id);
         }
 
         public User GetByUsername(string username)
         {
-            return _context.Users
-                .SingleOrDefault(user => user.Username.Equals(username));
+            return _context.Users.SingleOrDefault(user => user.Username.Equals(username));
         }
-
 
         public User Create(CreateUserRequest newUser)
         {
+            PasswordHelper.CreatePasswordHash(
+                newUser.Password,
+                out byte[] Salt,
+                out string HashedPassword
+            );
 
-            PasswordHelper.CreatePasswordHash(newUser.Password, out byte[] Salt, out string HashedPassword);
-            
-
-            var insertResponse = _context.Users.Add(new User
-            {
-                FirstName = newUser.FirstName,
-                LastName = newUser.LastName,
-                Email = newUser.Email,
-                Username = newUser.Username,
-                ProfileImageUrl = newUser.ProfileImageUrl,
-                CoverImageUrl = newUser.CoverImageUrl,
-                HashedPassword = HashedPassword,
-                Salt = Salt
-                // Salt = System.Text.Encoding.UTF8.GetString(Salt)
-                // Salt = Convert.ToBase64String(Salt)
-            });
+            var insertResponse = _context.Users.Add(
+                new User
+                {
+                    FirstName = newUser.FirstName,
+                    LastName = newUser.LastName,
+                    Email = newUser.Email,
+                    Username = newUser.Username,
+                    ProfileImageUrl = newUser.ProfileImageUrl,
+                    CoverImageUrl = newUser.CoverImageUrl,
+                    HashedPassword = HashedPassword,
+                    Salt = Salt,
+                    // Salt = System.Text.Encoding.UTF8.GetString(Salt)
+                    // Salt = Convert.ToBase64String(Salt)
+                }
+            );
 
             _context.SaveChanges();
 
@@ -96,7 +100,6 @@ namespace MyFace.Repositories
             // {
             //     Console.WriteLine(Salt[x]);
             // }
-
 
             return insertResponse.Entity;
         }
@@ -124,7 +127,5 @@ namespace MyFace.Repositories
             _context.Users.Remove(user);
             _context.SaveChanges();
         }
-
-       
     }
 }

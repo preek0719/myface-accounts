@@ -18,7 +18,7 @@ namespace MyFace.Repositories
         Post Update(int id, UpdatePostRequest update);
         void Delete(int id);
     }
-    
+
     public class PostsRepo : IPostsRepo
     {
         private readonly MyFaceDbContext _context;
@@ -27,61 +27,78 @@ namespace MyFace.Repositories
         {
             _context = context;
         }
-        
+
         public IEnumerable<Post> Search(PostSearchRequest search)
         {
-            return _context.Posts
-                .OrderByDescending(p => p.PostedAt)
+            return _context
+                .Posts.OrderByDescending(p => p.PostedAt)
                 .Where(p => search.PostedBy == null || p.UserId == search.PostedBy)
                 .Skip((search.Page - 1) * search.PageSize)
                 .Take(search.PageSize);
         }
-        
+
         public IEnumerable<Post> SearchFeed(FeedSearchRequest search)
         {
-            return _context.Posts
-                .OrderByDescending(p => p.PostedAt)
+            return _context
+                .Posts.OrderByDescending(p => p.PostedAt)
                 .Where(p => search.PostedBy == null || p.UserId == search.PostedBy)
-                .Where(p => search.LikedBy == null || p.Interactions.Where(i => i.Type == InteractionType.LIKE).Any(i => i.UserId == search.LikedBy))
-                .Where(p => search.DislikedBy == null || p.Interactions.Where(i => i.Type == InteractionType.DISLIKE).Any(i => i.UserId == search.DislikedBy))
+                .Where(p =>
+                    search.LikedBy == null
+                    || p.Interactions.Where(i => i.Type == InteractionType.LIKE)
+                        .Any(i => i.UserId == search.LikedBy)
+                )
+                .Where(p =>
+                    search.DislikedBy == null
+                    || p.Interactions.Where(i => i.Type == InteractionType.DISLIKE)
+                        .Any(i => i.UserId == search.DislikedBy)
+                )
                 .Include(p => p.User)
-                .Include(p => p.Interactions).ThenInclude(i => i.User)
+                .Include(p => p.Interactions)
+                .ThenInclude(i => i.User)
                 .Skip((search.Page - 1) * search.PageSize)
                 .Take(search.PageSize);
         }
 
         public int Count(PostSearchRequest search)
         {
-            return _context.Posts
-                .Count(p => search.PostedBy == null || p.UserId == search.PostedBy);
+            return _context.Posts.Count(p =>
+                search.PostedBy == null || p.UserId == search.PostedBy
+            );
         }
 
         public int CountFeed(FeedSearchRequest search)
         {
-            return _context.Posts
-                .Where(p => search.PostedBy == null || p.UserId == search.PostedBy)
-                .Where(p => search.LikedBy == null || p.Interactions.Where(i => i.Type == InteractionType.LIKE)
-                                .Any(i => i.UserId == search.LikedBy))
-                .Where(p => search.DislikedBy == null || p.Interactions.Where(i => i.Type == InteractionType.DISLIKE)
-                                .Any(i => i.UserId == search.DislikedBy))
+            return _context
+                .Posts.Where(p => search.PostedBy == null || p.UserId == search.PostedBy)
+                .Where(p =>
+                    search.LikedBy == null
+                    || p.Interactions.Where(i => i.Type == InteractionType.LIKE)
+                        .Any(i => i.UserId == search.LikedBy)
+                )
+                .Where(p =>
+                    search.DislikedBy == null
+                    || p.Interactions.Where(i => i.Type == InteractionType.DISLIKE)
+                        .Any(i => i.UserId == search.DislikedBy)
+                )
                 .Count();
         }
 
         public Post GetById(int id)
         {
-            return _context.Posts
-                .Single(post => post.Id == id);
+            return _context.Posts.Single(post => post.Id == id);
         }
 
         public Post Create(CreatePostRequest post)
         {
-            var insertResult = _context.Posts.Add(new Post
-            {
-                ImageUrl = post.ImageUrl,
-                Message = post.Message,
-                PostedAt = DateTime.Now,
-                UserId = post.UserId,
-            });
+            var insertResult = _context.Posts.Add(
+                new Post
+                {
+                    ImageUrl = post.ImageUrl,
+                    Message = post.Message,
+                    PostedAt = DateTime.Now,
+                    UserId = post.UserId,
+                }
+            );
             _context.SaveChanges();
             return insertResult.Entity;
         }
@@ -95,7 +112,7 @@ namespace MyFace.Repositories
 
             _context.Posts.Update(post);
             _context.SaveChanges();
-            
+
             return post;
         }
 

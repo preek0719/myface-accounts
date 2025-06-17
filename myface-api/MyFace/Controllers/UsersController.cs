@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
+using MyFace.Helpers;
+using MyFace.Models.Database;
 using MyFace.Models.Request;
 using MyFace.Models.Response;
 using MyFace.Repositories;
-using MyFace.Helpers;
-using MyFace.Models.Database;
-using System;
 
 namespace MyFace.Controllers
 {
@@ -18,13 +18,13 @@ namespace MyFace.Controllers
         {
             _users = users;
         }
-        
+
         [HttpGet("")]
         public ActionResult<UserListResponse> Search([FromQuery] UserSearchRequest searchRequest)
         {
             // var authHeader = Request;
-                   
-            // bool validUser = BasicAuth.AuthenticateUser(authHeader, _users);
+
+            // bool validUser = AuthorizationHeaderReader.AuthenticateUser(authHeader, _users);
             // Console.WriteLine(validUser);
             var users = _users.Search(searchRequest);
             var userCount = _users.Count(searchRequest);
@@ -46,14 +46,17 @@ namespace MyFace.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user =  _users.Create(newUser);
+            var user = _users.Create(newUser);
             var url = Url.Action("GetById", new { id = user.Id });
             var responseViewModel = new UserResponse(user);
             return Created(url, responseViewModel);
         }
 
         [HttpPatch("{id}/update")]
-        public ActionResult<UserResponse> Update([FromRoute] int id, [FromBody] UpdateUserRequest update)
+        public ActionResult<UserResponse> Update(
+            [FromRoute] int id,
+            [FromBody] UpdateUserRequest update
+        )
         {
             if (!ModelState.IsValid)
             {
@@ -63,7 +66,7 @@ namespace MyFace.Controllers
             var user = _users.Update(id, update);
             return new UserResponse(user);
         }
-        
+
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] int id)
         {

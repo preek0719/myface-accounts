@@ -11,7 +11,7 @@ export function Login(): JSX.Element {
     
     function tryLogin(event: FormEvent) {
         event.preventDefault();
-        loginContext.logIn();
+        loginContext.logIn(username, password);
     }
     
     return (
@@ -28,7 +28,7 @@ export function Login(): JSX.Element {
                     <input className="form-input" type={"password"} value={password} onChange={event => setPassword(event.target.value)}/>
                 </label>
                 
-                <button className="submit-button" type="submit">Log In</button>
+                <button className="submit-button" type="submit" >Log In</button>
             </form>
         </Page>
     );

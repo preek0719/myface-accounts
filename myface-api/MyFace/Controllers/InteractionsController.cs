@@ -15,9 +15,11 @@ namespace MyFace.Controllers
         {
             _interactions = interactions;
         }
-    
+
         [HttpGet("")]
-        public ActionResult<ListResponse<InteractionResponse>> Search([FromQuery] SearchRequest search)
+        public ActionResult<ListResponse<InteractionResponse>> Search(
+            [FromQuery] SearchRequest search
+        )
         {
             var interactions = _interactions.Search(search);
             var interactionCount = _interactions.Count(search);
@@ -38,7 +40,7 @@ namespace MyFace.Controllers
             {
                 return BadRequest(ModelState);
             }
-        
+
             var interaction = _interactions.Create(newUser);
 
             var url = Url.Action("GetById", new { id = interaction.Id });
